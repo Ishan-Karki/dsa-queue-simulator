@@ -1,45 +1,22 @@
-from collections import deque
-from enum import Enum
-
-
-class LaneType(Enum):
-    INCOMING = "Incoming"
-    OUTGOING = "Outgoing"
-    FREE_LEFT = "Free-Left"
-
+import time
+from constants import ROAD_GRAY
 
 class Vehicle:
-    
-    def __init__(self, arrival_time):
-        self.arrival_time = arrival_time
-    
-    def __repr__(self):
-        return f"Vehicle(arrival_time={self.arrival_time})"
-
-
-class Lane(deque):
-    
-    def __init__(self, lane_id, lane_type):
-        super().__init__()
+    def __init__(self, lane_id, x, y, dx, dy):
         self.lane_id = lane_id
-        self.lane_type = lane_type
-    
-    def enqueue(self, vehicle):
-        self.append(vehicle)
-    
-    def dequeue(self):
-        if self.is_empty():
-            return None
-        return self.popleft()
-    
-    def is_empty(self):
-        return len(self) == 0
-    
-    def peek(self):
-        if self.is_empty():
-            return None
-        return self[0]
-    
-    def __repr__(self):
-        return f"Lane(id='{self.lane_id}', type={self.lane_type.value}, vehicles={len(self)})"
+        self.x = x
+        self.y = y
+        self.dx = dx # Horizontal speed
+        self.dy = dy # Vertical speed
+        self.speed = 2
+        self.crossed = False
 
+    def move(self, can_move):
+        if can_move:
+            self.x += self.dx * self.speed
+            self.y += self.dy * self.speed
+
+    def draw(self, screen):
+        import pygame
+        # Draw a small rectangle for the car
+        pygame.draw.rect(screen, (100, 149, 237), (self.x, self.y, 20, 20))
