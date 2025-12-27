@@ -22,8 +22,8 @@ class Visualizer:
         # Center Intersection (same color as road to blend)
         pygame.draw.rect(self.screen, ROAD_COLOR, (CX - INTERSECTION_SIZE//2, CY - INTERSECTION_SIZE//2, INTERSECTION_SIZE, INTERSECTION_SIZE))
 
-        # Dotted Intersection Outline
-        self._draw_intersection_dots()
+        # Dotted Intersection Outline - Removed as per user request
+        # self._draw_intersection_dots()
 
         # Crosswalks
         self._draw_crosswalks()
@@ -87,31 +87,18 @@ class Visualizer:
              pygame.draw.rect(self.screen, MARKING_WHITE, (x, y, 8, 8))
 
     def _draw_markings(self):
-        # White Dashed Lines for ALL divisions
-        # Reduced to 2 lanes per One-Way -> loops: 0 (center), 40 (divider). 
-        # Output: center line, + 1 dashed line per side. = 3 lines total.
+        # Lane Markings (2 STRIPPED LINES PER ROAD -> 3 LANES)
+        # Offsets -27, 27 to divide 160px road into 3 lanes (~53px each)
         
         # Vertical Roads (A, C)
-        for x_off in [0, 40]:
-            if x_off == 0:
-                 self._dashed((CX, 0), (CX, CY - INTERSECTION_SIZE//2 - 12))
-                 self._dashed((CX, CY + INTERSECTION_SIZE//2 + 12), (CX, SCREEN_HEIGHT))
-            else:
-                self._dashed((CX - x_off, 0), (CX - x_off, CY - INTERSECTION_SIZE//2 - 12))
-                self._dashed((CX + x_off, 0), (CX + x_off, CY - INTERSECTION_SIZE//2 - 12))
-                self._dashed((CX - x_off, CY + INTERSECTION_SIZE//2 + 12), (CX - x_off, SCREEN_HEIGHT))
-                self._dashed((CX + x_off, CY + INTERSECTION_SIZE//2 + 12), (CX + x_off, SCREEN_HEIGHT))
+        for x_off in [-27, 27]:
+            self._dashed((CX - x_off, 0), (CX - x_off, CY - INTERSECTION_SIZE//2 - 12))
+            self._dashed((CX - x_off, CY + INTERSECTION_SIZE//2 + 12), (CX - x_off, SCREEN_HEIGHT))
 
         # Horizontal Roads (B, D)
-        for y_off in [0, 40]:
-            if y_off == 0:
-                self._dashed((0, CY), (CX - INTERSECTION_SIZE//2 - 12, CY))
-                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY), (SCREEN_WIDTH, CY))
-            else:
-                self._dashed((0, CY - y_off), (CX - INTERSECTION_SIZE//2 - 12, CY - y_off))
-                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY - y_off), (SCREEN_WIDTH, CY - y_off))
-                self._dashed((0, CY + y_off), (CX - INTERSECTION_SIZE//2 - 12, CY + y_off))
-                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY + y_off), (SCREEN_WIDTH, CY + y_off))
+        for y_off in [-27, 27]:
+            self._dashed((0, CY - y_off), (CX - INTERSECTION_SIZE//2 - 12, CY - y_off))
+            self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY - y_off), (SCREEN_WIDTH, CY - y_off))
     
     def _dashed(self, start, end):
         # Custom Dash
