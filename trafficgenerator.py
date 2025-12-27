@@ -109,10 +109,10 @@ def main():
             # Dynamic Delay for Priority Buildup
             if lane == 2:
                 # Faster bursts for AL2 to trigger priority
-                delay = random.uniform(0.2, 0.5)
+                delay = random.uniform(0.3, 0.6)
             else:
                 # Slower, efficient traffic for others
-                delay = random.uniform(0.5, 1.0)
+                delay = random.uniform(0.8, 1.3)
                 
             time.sleep(delay)
 
