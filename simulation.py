@@ -42,6 +42,12 @@ class Vehicle:
         
         # Init physics
         self.speed = 0
+        
+        # Color based on lane
+        if lane.name == 'L2':
+            self.color = (50, 100, 255) # Blue
+        else:
+            self.color = (255, 50, 50) # Red
 
     def set_path(self, path):
         self.path = path
@@ -95,7 +101,7 @@ class Intersection:
             'A': Road('A'), 'B': Road('B'), 'C': Road('C'), 'D': Road('D')
         }
         self.timer = 0
-        self.green_duration = 180 # Default
+        self.green_duration = 600 # Initial 10s
         self.current_green_idx = 0 # 0=A,1=B,2=C,3=D
         self.order = ['A', 'B', 'C', 'D']
         self.priority_mode = False
@@ -162,9 +168,9 @@ class Intersection:
                 r_obj = self.roads[next_road_id]
                 waiting = r_obj.get_waiting_count()
                 
-                t = 20 
-                self.green_duration = max(120, int(waiting * t))
-                self.green_duration = min(self.green_duration, 600)
+                t = 40 
+                self.green_duration = max(600, int(waiting * t))
+                self.green_duration = min(self.green_duration, 1200)
                 
             curr_id = self.order[self.current_green_idx]
             self._set_lights(curr_id)

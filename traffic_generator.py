@@ -25,7 +25,7 @@ def main():
                         print(f"Error sending: {e}")
                         break
                     
-                    time.sleep(1.5) # 1.5s * 2 = 3s for 2 vehicles
+                    time.sleep(0.5) # Fastened generation
                     
         except ConnectionRefusedError:
             print("Simulator not running. Retrying in 2s...")

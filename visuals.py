@@ -166,15 +166,14 @@ class Visualizer:
                     elif r.id == 'B': x = sx + (i+1)*gap; y = sy # B Inbound comes from Right side, so Queue is on Right
                     elif r.id == 'D': x = sx - (i+1)*gap; y = sy
                     
-                    self._draw_static_car(x, y, r.id, lane.name)
+                    self._draw_static_car(x, y, lane)
 
-    def _draw_static_car(self, x, y, rid, lname):
-        color = (255, 50, 50)
-        if lname == 'L2': color = (50, 100, 255)
+    def _draw_static_car(self, x, y, lane):
+        color = lane.vehicles[0].color if lane.vehicles else (255, 50, 50)
         
         rect = pygame.Rect(0,0, 24, 14)
         rect.center = (x, y)
-        if rid in ['A', 'C']:
+        if lane.road_id in ['A', 'C']:
             rect = pygame.Rect(0,0, 14, 24)
             rect.center = (x, y)
             
@@ -183,7 +182,7 @@ class Visualizer:
 
     def _draw_vehicle(self, v):
         # Moving vehicle
-        color = (255, 255, 0)
+        color = getattr(v, 'color', (255, 255, 0))
         s = pygame.Surface((24, 14), pygame.SRCALPHA)
         pygame.draw.rect(s, color, (0,0,24,14), border_radius=4)
         rot = pygame.transform.rotate(s, -math.degrees(v.angle))
