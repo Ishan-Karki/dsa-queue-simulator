@@ -112,6 +112,14 @@ def main():
         viz.draw_traffic_lights(sim)
         viz.draw_ui(sim)
         
+        viz.draw_ui(sim)
+        
+        # Capture screenshot for verification (once)
+        if not getattr(sys, 'screenshot_taken', False) and pygame.time.get_ticks() > 2000:
+            pygame.image.save(screen, "screenshot_2lane.png")
+            print("Screenshot saved: screenshot_2lane.png")
+            sys.screenshot_taken = True
+
         pygame.display.flip()
 
     pygame.quit()

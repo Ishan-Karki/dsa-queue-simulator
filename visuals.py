@@ -3,10 +3,10 @@ import math
 from utils import *
 
 # Colors
-GRASS_COLOR = (34, 139, 34)
-ROAD_COLOR = (50, 50, 50)
-MARKING_WHITE = (220, 220, 220)
-MARKING_YELLOW = (220, 200, 0)
+# Colors - Restyled
+GRASS_COLOR = (45, 60, 45) # Dark Green
+ROAD_COLOR = (60, 60, 70) # Dark Grey
+MARKING_WHITE = (240, 240, 240)
 
 class Visualizer:
     def __init__(self, screen):
@@ -19,44 +19,118 @@ class Visualizer:
         # Roads
         pygame.draw.rect(self.screen, ROAD_COLOR, (CX - INTERSECTION_SIZE//2, 0, INTERSECTION_SIZE, SCREEN_HEIGHT))
         pygame.draw.rect(self.screen, ROAD_COLOR, (0, CY - INTERSECTION_SIZE//2, SCREEN_WIDTH, INTERSECTION_SIZE))
-        pygame.draw.rect(self.screen, (60, 60, 60), (CX - INTERSECTION_SIZE//2, CY - INTERSECTION_SIZE//2, INTERSECTION_SIZE, INTERSECTION_SIZE))
+        # Center Intersection (same color as road to blend)
+        pygame.draw.rect(self.screen, ROAD_COLOR, (CX - INTERSECTION_SIZE//2, CY - INTERSECTION_SIZE//2, INTERSECTION_SIZE, INTERSECTION_SIZE))
 
-        # Highlight Priority Lane (AL2)
-        self._highlight_priority_lane()
+        # Dotted Intersection Outline
+        self._draw_intersection_dots()
+
+        # Crosswalks
+        self._draw_crosswalks()
 
         # Lane Markings
         self._draw_markings()
+
+    def _draw_intersection_dots(self):
+        # Dotted square around the intersection area to delineate it
+        half = INTERSECTION_SIZE // 2
+        # Use big white dots
         
-        # Visual Helpers
-        self._draw_road_labels()
-        self._draw_lane_arrows()
+        # Top Edge
+        self._dotted_line((CX - half, CY - half), (CX + half, CY - half))
+        # Bot Edge
+        self._dotted_line((CX - half, CY + half), (CX + half, CY + half))
+        # Left Edge
+        self._dotted_line((CX - half, CY - half), (CX - half, CY + half))
+        # Right Edge
+        self._dotted_line((CX + half, CY - half), (CX + half, CY + half))
+        
+    def _dotted_line(self, start, end):
+        # Big square dots
+        x1, y1 = start
+        x2, y2 = end
+        dist = math.hypot(x2-x1, y2-y1)
+        steps = int(dist // 20) # 20px gaps
+        
+        for i in range(steps + 1):
+             t = i / steps if steps > 0 else 0
+             x = x1 + (x2-x1)*t
+             y = y1 + (y2-y1)*t
+             pygame.draw.rect(self.screen, MARKING_WHITE, (x-4, y-4, 8, 8))
+
+    def _draw_crosswalks(self):
+        # Draw zebra stripes at the 4 entrances
+        half = INTERSECTION_SIZE // 2
+        
+        # Top Crosswalk
+        y = CY - half - 10
+        self._zebra_h(CX - half, CX + half, y)
+        
+        # Bottom Crosswalk
+        y = CY + half + 2
+        self._zebra_h(CX - half, CX + half, y)
+
+        # Left Crosswalk
+        x = CX - half - 10
+        self._zebra_v(CY - half, CY + half, x)
+        
+        # Right Crosswalk
+        x = CX + half + 2
+        self._zebra_v(CY - half, CY + half, x)
+
+    def _zebra_h(self, x1, x2, y):
+        for x in range(int(x1), int(x2), 15):
+             pygame.draw.rect(self.screen, MARKING_WHITE, (x, y, 8, 8))
+
+    def _zebra_v(self, y1, y2, x):
+         for y in range(int(y1), int(y2), 15):
+             pygame.draw.rect(self.screen, MARKING_WHITE, (x, y, 8, 8))
 
     def _draw_markings(self):
-        # Yellow Center Lines
-        pygame.draw.line(self.screen, MARKING_YELLOW, (CX, 0), (CX, CY - INTERSECTION_SIZE//2), 3) # Top
-        pygame.draw.line(self.screen, MARKING_YELLOW, (CX, CY + INTERSECTION_SIZE//2), (CX, SCREEN_HEIGHT), 3) # Bot
-        pygame.draw.line(self.screen, MARKING_YELLOW, (0, CY), (CX - INTERSECTION_SIZE//2, CY), 3) # Left
-        pygame.draw.line(self.screen, MARKING_YELLOW, (CX + INTERSECTION_SIZE//2, CY), (SCREEN_WIDTH, CY), 3) # Right
+        # White Dashed Lines for ALL divisions
+        # Reduced to 2 lanes per One-Way -> loops: 0 (center), 40 (divider). 
+        # Output: center line, + 1 dashed line per side. = 3 lines total.
         
-        # Dashed White Lines for Lanes
-        # A (Top): Left side has 3 lanes. x = CX - 40, CX - 80.
-        # Right side has 3 lanes. x = CX + 40, CX + 80.
-        for off in [40, 80]:
-            # Vertical
-            self._dashed((CX-off, 0), (CX-off, CY-INTERSECTION_SIZE//2))
-            self._dashed((CX+off, 0), (CX+off, CY-INTERSECTION_SIZE//2))
-            self._dashed((CX-off, CY+INTERSECTION_SIZE//2), (CX-off, SCREEN_HEIGHT))
-            self._dashed((CX+off, CY+INTERSECTION_SIZE//2), (CX+off, SCREEN_HEIGHT))
-            
-            # Horizontal
-            self._dashed((0, CY-off), (CX-INTERSECTION_SIZE//2, CY-off))
-            self._dashed((CX+INTERSECTION_SIZE//2, CY-off), (SCREEN_WIDTH, CY-off))
-            self._dashed((0, CY+off), (CX-INTERSECTION_SIZE//2, CY+off))
-            self._dashed((CX+INTERSECTION_SIZE//2, CY+off), (SCREEN_WIDTH, CY+off))
+        # Vertical Roads (A, C)
+        for x_off in [0, 40]:
+            if x_off == 0:
+                 self._dashed((CX, 0), (CX, CY - INTERSECTION_SIZE//2 - 12))
+                 self._dashed((CX, CY + INTERSECTION_SIZE//2 + 12), (CX, SCREEN_HEIGHT))
+            else:
+                self._dashed((CX - x_off, 0), (CX - x_off, CY - INTERSECTION_SIZE//2 - 12))
+                self._dashed((CX + x_off, 0), (CX + x_off, CY - INTERSECTION_SIZE//2 - 12))
+                self._dashed((CX - x_off, CY + INTERSECTION_SIZE//2 + 12), (CX - x_off, SCREEN_HEIGHT))
+                self._dashed((CX + x_off, CY + INTERSECTION_SIZE//2 + 12), (CX + x_off, SCREEN_HEIGHT))
 
+        # Horizontal Roads (B, D)
+        for y_off in [0, 40]:
+            if y_off == 0:
+                self._dashed((0, CY), (CX - INTERSECTION_SIZE//2 - 12, CY))
+                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY), (SCREEN_WIDTH, CY))
+            else:
+                self._dashed((0, CY - y_off), (CX - INTERSECTION_SIZE//2 - 12, CY - y_off))
+                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY - y_off), (SCREEN_WIDTH, CY - y_off))
+                self._dashed((0, CY + y_off), (CX - INTERSECTION_SIZE//2 - 12, CY + y_off))
+                self._dashed((CX + INTERSECTION_SIZE//2 + 12, CY + y_off), (SCREEN_WIDTH, CY + y_off))
+    
     def _dashed(self, start, end):
-        pygame.draw.line(self.screen, MARKING_WHITE, start, end, 1)
-
+        # Custom Dash
+        x1, y1 = start
+        x2, y2 = end
+        dist = math.hypot(x2-x1, y2-y1)
+        steps = int(dist // 20) # 20px gap
+        
+        for i in range(steps):
+             t = i / steps
+             t2 = (i + 0.5) / steps
+             
+             sx = x1 + (x2-x1)*t
+             sy = y1 + (y2-y1)*t
+             ex = x1 + (x2-x1)*t2
+             ey = y1 + (y2-y1)*t2
+             
+             pygame.draw.line(self.screen, MARKING_WHITE, (sx, sy), (ex, ey), 2)
+             
     def draw_traffic_lights(self, intersection):
         # Draw lights at stop pos of each lane
         for r_id, road in intersection.roads.items():
@@ -140,81 +214,4 @@ class Visualizer:
             self.screen.blit(self.font.render(t, True, c), (10, y))
             y += 20
 
-    def _highlight_priority_lane(self):
-        # Road A (Top), Lane 2 (Middle)
-        # Vertical strip from Top to Intersection
-        # X range: CX - 80 to CX - 40
-        # Y range: 0 to CY - INTERSECTION_SIZE//2
-        
-        surface = pygame.Surface((40, CY - INTERSECTION_SIZE//2), pygame.SRCALPHA)
-        surface.fill((255, 215, 0, 50)) # Gold tint, transparent
-        self.screen.blit(surface, (CX - 80, 0))
-        
-    def _draw_road_labels(self):
-        labels = [
-            ('A', (CX, 20)),
-            ('B', (SCREEN_WIDTH - 20, CY)),
-            ('C', (CX, SCREEN_HEIGHT - 20)),
-            ('D', (20, CY))
-        ]
-        
-        # Larger font for Labels
-        font = pygame.font.SysFont("Verdana", 24, bold=True)
-        
-        for text, (x, y) in labels:
-            surf = font.render(text, True, (255, 255, 255))
-            rect = surf.get_rect(center=(x, y))
-            self.screen.blit(surf, rect)
 
-    def _draw_lane_arrows(self):
-        # Draw arrows for L3 (Free Left)
-        # Position slightly upstream from stop line
-        offset = 60 
-        
-        # A-L3 (Top, Leftmost incoming) -> Turn Left
-        self._draw_arrow((CX - 100, CY - INTERSECTION_SIZE//2 - offset), "DOWN_LEFT")
-        
-        # B-L3 (Right, Topmost incoming) -> Turn Left
-        self._draw_arrow((CX + INTERSECTION_SIZE//2 + offset, CY - 100), "LEFT_DOWN")
-        
-        # C-L3 (Bot, Rightmost incoming) -> Turn Left
-        self._draw_arrow((CX + 100, CY + INTERSECTION_SIZE//2 + offset), "UP_RIGHT")
-        
-        # D-L3 (Left, Botmost incoming) -> Turn Left
-        self._draw_arrow((CX - INTERSECTION_SIZE//2 - offset, CY + 100), "RIGHT_UP")
-
-    def _draw_arrow(self, pos, direction):
-        x, y = pos
-        # pygame.draw.circle(self.screen, (255, 255, 255), (int(x), int(y)), 2)
-        
-        c = (200, 200, 200)
-        w = 3
-        sz = 15
-        
-        if direction == "DOWN_LEFT":
-            pygame.draw.line(self.screen, c, (x, y-sz), (x, y), w) # Straight
-            pygame.draw.line(self.screen, c, (x, y), (x-sz, y+sz//2), w) # Turn
-            # Arrowhead
-            pygame.draw.line(self.screen, c, (x-sz, y+sz//2), (x-sz+5, y+sz//2-5), w)
-            pygame.draw.line(self.screen, c, (x-sz, y+sz//2), (x-sz+5, y+sz//2+5), w)
-            
-        elif direction == "LEFT_DOWN":
-            pygame.draw.line(self.screen, c, (x+sz, y), (x, y), w)
-            pygame.draw.line(self.screen, c, (x, y), (x-sz//2, y+sz), w)
-            # Arrowhead
-            pygame.draw.line(self.screen, c, (x-sz//2, y+sz), (x-sz//2+5, y+sz-5), w)
-            pygame.draw.line(self.screen, c, (x-sz//2, y+sz), (x-sz//2-5, y+sz-5), w)
-
-        elif direction == "UP_RIGHT":
-            pygame.draw.line(self.screen, c, (x, y+sz), (x, y), w)
-            pygame.draw.line(self.screen, c, (x, y), (x+sz, y-sz//2), w)
-            # Arrowhead
-            pygame.draw.line(self.screen, c, (x+sz, y-sz//2), (x+sz-5, y-sz//2-5), w)
-            pygame.draw.line(self.screen, c, (x+sz, y-sz//2), (x+sz-5, y-sz//2+5), w)
-
-        elif direction == "RIGHT_UP":
-            pygame.draw.line(self.screen, c, (x-sz, y), (x, y), w)
-            pygame.draw.line(self.screen, c, (x, y), (x+sz//2, y-sz), w)
-            # Arrowhead
-            pygame.draw.line(self.screen, c, (x+sz//2, y-sz), (x+sz//2-5, y-sz+5), w)
-            pygame.draw.line(self.screen, c, (x+sz//2, y-sz), (x+sz//2+5, y-sz+5), w)

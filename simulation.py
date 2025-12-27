@@ -95,22 +95,22 @@ class Intersection:
         # A (Top)
         self.roads['A'].L1.stop_pos = (CX - 0.5*LANE_WIDTH, CY - half)
         self.roads['A'].L2.stop_pos = (CX - 1.5*LANE_WIDTH, CY - half)
-        self.roads['A'].L3.stop_pos = (CX - 2.5*LANE_WIDTH, CY - half)
+        self.roads['A'].L3.stop_pos = (CX - 1.5*LANE_WIDTH, CY - half) # Clamped to L2
         
         # B (Right)
         self.roads['B'].L1.stop_pos = (CX + half, CY - 0.5*LANE_WIDTH)
         self.roads['B'].L2.stop_pos = (CX + half, CY - 1.5*LANE_WIDTH)
-        self.roads['B'].L3.stop_pos = (CX + half, CY - 2.5*LANE_WIDTH)
+        self.roads['B'].L3.stop_pos = (CX + half, CY - 1.5*LANE_WIDTH) # Clamped
         
         # C (Bottom)
         self.roads['C'].L1.stop_pos = (CX + 0.5*LANE_WIDTH, CY + half)
         self.roads['C'].L2.stop_pos = (CX + 1.5*LANE_WIDTH, CY + half)
-        self.roads['C'].L3.stop_pos = (CX + 2.5*LANE_WIDTH, CY + half)
+        self.roads['C'].L3.stop_pos = (CX + 1.5*LANE_WIDTH, CY + half) # Clamped
         
         # D (Left)
         self.roads['D'].L1.stop_pos = (CX - half, CY + 0.5*LANE_WIDTH)
         self.roads['D'].L2.stop_pos = (CX - half, CY + 1.5*LANE_WIDTH)
-        self.roads['D'].L3.stop_pos = (CX - half, CY + 2.5*LANE_WIDTH)
+        self.roads['D'].L3.stop_pos = (CX - half, CY + 1.5*LANE_WIDTH) # Clamped
 
     def update(self):
         # 1. Check Priority Condition (AL2 > 10)
