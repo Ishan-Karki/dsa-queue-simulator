@@ -13,24 +13,19 @@ def main():
                 print("Connected to Simulator!")
                 
                 while True:
-                    # Random Spawn Request
-                    if random.random() < 0.2: # Control spawn rate
-                        r_id = random.choice(['A', 'B', 'C', 'D'])
-                        # Higher chance for AL2 to test priority
-                        if random.random() < 0.4:
-                            l_id = 'L2'
-                        else:
-                            l_id = random.choice(['L1', 'L2', 'L3'])
-                        
-                        msg = f"{r_id}:{l_id}"
-                        try:
-                            s.sendall(msg.encode())
-                            # print(f"Sent: {msg}")
-                        except Exception as e:
-                            print(f"Error sending: {e}")
-                            break
+                    # Target: 2 vehicles every 3 seconds -> 1 vehicle every 1.5 seconds
+                    r_id = random.choice(['A', 'B', 'C', 'D'])
+                    l_id = random.choice(['L1', 'L2', 'L3'])
                     
-                    time.sleep(0.1) # Simulate real-time delay
+                    msg = f"{r_id}:{l_id}"
+                    try:
+                        s.sendall(msg.encode())
+                        print(f"[{time.strftime('%H:%M:%S')}] Spawned vehicle: {msg}")
+                    except Exception as e:
+                        print(f"Error sending: {e}")
+                        break
+                    
+                    time.sleep(1.5) # 1.5s * 2 = 3s for 2 vehicles
                     
         except ConnectionRefusedError:
             print("Simulator not running. Retrying in 2s...")
