@@ -92,7 +92,7 @@ def get_lane_angle(lane):
 # --- Visual Config ---
 ROAD_COLOR = (40, 40, 40)
 MARKING_COLOR = (200, 200, 200)
-BG_COLOR = (15, 15, 20)
+BG_COLOR = (30, 100, 30) # Grass Green
 TEXT_COLOR = (255, 255, 255)
 
 def spawn_vehicle(lane):
@@ -194,10 +194,10 @@ def update_vehicles():
     # C (7-9): Left (Decreasing X) -> Sort X Desc
     # D (10-12): Right (Increasing X) -> Sort X Asc
     
-    for l in range(1, 4): lane_groups[l].sort(key=lambda v: v.y)
-    for l in range(4, 7): lane_groups[l].sort(key=lambda v: v.y, reverse=True)
-    for l in range(7, 10): lane_groups[l].sort(key=lambda v: v.x, reverse=True)
-    for l in range(10, 13): lane_groups[l].sort(key=lambda v: v.x)
+    for l in range(1, 4): lane_groups[l].sort(key=lambda v: v.y, reverse=True)
+    for l in range(4, 7): lane_groups[l].sort(key=lambda v: v.y)
+    for l in range(7, 10): lane_groups[l].sort(key=lambda v: v.x)
+    for l in range(10, 13): lane_groups[l].sort(key=lambda v: v.x, reverse=True)
     
     min_gap = 45.0
     
@@ -227,7 +227,7 @@ def update_vehicles():
         dist = math.hypot(dx, dy)
         length = max(dist * 1.11, 1.0)
         
-        v.t_speed = (v.speed * 3.0) / length
+        v.t_speed = (v.speed * 0.6) / length
 
     # Move Vertical
     # Increasing Y (A: 1-3)
@@ -515,26 +515,26 @@ def main():
             pygame.draw.circle(screen, g_col, (gx + 5, gy + 5), 5)
 
         l_state = next_light
-        draw_light(380, 345, l_state != 1, True) # A
-        draw_light(375, 430, l_state != 2, True) # B 
-        draw_light(430, 380, l_state != 3, False) # C
-        draw_light(350, 380, l_state != 4, False) # D
+        # Lights at corners (Right-side relative to driver)
+        draw_light(295, 275, l_state != 1, False) # A (Top-Left)
+        draw_light(485, 485, l_state != 2, False) # B (Bot-Right)
+        draw_light(485, 275, l_state != 3, False) # C (Top-Right)
+        draw_light(295, 485, l_state != 4, False) # D (Bot-Left)
         
         # Vehicles
         for v in active_vehicles:
             if not v.active: continue
             
             # Angle Logic
-            angle = get_lane_angle(v.lane)
+            # Angle Logic
             if v.turning:
-                tgt = get_lane_angle(v.target_lane)
-                diff = tgt - angle
-                if abs(diff) > 180:
-                    if tgt < angle: tgt += 360
-                    else: angle += 360
-                render_angle = angle + (tgt - angle) * v.t
+                # Calculate Bezier derivative (tangent) for fluid rotation
+                t = v.t
+                dx = 2 * (1 - t) * (v.p1[0] - v.p0[0]) + 2 * t * (v.p2[0] - v.p1[0])
+                dy = 2 * (1 - t) * (v.p1[1] - v.p0[1]) + 2 * t * (v.p2[1] - v.p1[1])
+                render_angle = math.degrees(math.atan2(dy, dx))
             else:
-                render_angle = angle
+                render_angle = get_lane_angle(v.lane)
             
             # Draw
             cx = v.x + (20.0 if v.horizontal else 12.5)
@@ -542,30 +542,29 @@ def main():
             
             # Car Body
             surf = pygame.Surface((40, 25), pygame.SRCALPHA)
-            # Soft shadow
-            # pygame.draw.rect(surf, (0,0,0, 100), (2, 2, 40, 25), border_radius=5)
-            pygame.draw.rect(surf, v.body_color, (0, 0, 40, 25), border_radius=4)
-            
-            # Windshield (Dark Tech)
-            pygame.draw.rect(surf, (10, 20, 30), (28, 2, 8, 21), border_radius=2)
-            
-            # Headlights (Bright Beams)
-            pygame.draw.rect(surf, (255, 255, 200), (36, 1, 4, 5))
-            pygame.draw.rect(surf, (255, 255, 200), (36, 19, 4, 5))
-            
-            # Brake Lights (Red)
-            pygame.draw.rect(surf, (200, 0, 0), (0, 1, 2, 5))
-            pygame.draw.rect(surf, (200, 0, 0), (0, 19, 2, 5))
+            pygame.draw.rect(surf, v.body_color, (0, 0, 40, 25), border_radius=6)
 
             # Rotate
-            rotated = pygame.transform.rotate(surf, -render_angle) # Negative for Pygame
+            rotated = pygame.transform.rotate(surf, -render_angle)
             rect = rotated.get_rect(center=(cx, cy))
             screen.blit(rotated, rect)
 
-        if not getattr(sys, 'screenshot_taken', False) and pygame.time.get_ticks() > 5000:
-            pygame.image.save(screen, "screenshot_modern_ui.png")
-            print("Screenshot saved: screenshot_modern_ui.png")
-            sys.screenshot_taken = True
+        # Draw Mode Indicator
+        mode_text = "MODE: NORMAL"
+        mode_color = (255, 255, 255) 
+
+        if priority_lane != -1:
+            mode_text = f"MODE: PRIORITY (Road {chr(ord('A') + priority_lane)})"
+            mode_color = (255, 200, 50) # Orange/Gold
+
+        # Draw text with a slight shadow for better readability
+        shadow_surf = font.render(mode_text, True, (0, 0, 0))
+        screen.blit(shadow_surf, (12, 12))
+        
+        mode_surf = font.render(mode_text, True, mode_color)
+        screen.blit(mode_surf, (10, 10))
+
+
 
         pygame.display.flip()
 

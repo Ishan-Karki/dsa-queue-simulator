@@ -85,13 +85,8 @@ def main():
     print("Queue-based vehicle generation system initialized.")
     
     # Speed Input
-    try:
-        sp_in = input("Enter traffic speed (1-10, where 10 is fastest): ")
-        speed_level = int(sp_in)
-        speed_level = max(1, min(10, speed_level))
-    except:
-        speed_level = 5
-    print(f"Traffic Speed set to: {speed_level}/10")
+    speed_level = 5
+
     
     def generator_loop():
         valid_lanes = [2, 3, 4, 5, 8, 9, 10, 11]
