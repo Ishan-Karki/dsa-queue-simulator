@@ -21,8 +21,15 @@ class Visualizer:
         pygame.draw.rect(self.screen, ROAD_COLOR, (0, CY - INTERSECTION_SIZE//2, SCREEN_WIDTH, INTERSECTION_SIZE))
         pygame.draw.rect(self.screen, (60, 60, 60), (CX - INTERSECTION_SIZE//2, CY - INTERSECTION_SIZE//2, INTERSECTION_SIZE, INTERSECTION_SIZE))
 
+        # Highlight Priority Lane (AL2)
+        self._highlight_priority_lane()
+
         # Lane Markings
         self._draw_markings()
+        
+        # Visual Helpers
+        self._draw_road_labels()
+        self._draw_lane_arrows()
 
     def _draw_markings(self):
         # Yellow Center Lines
@@ -132,3 +139,82 @@ class Visualizer:
             c = (255, 100, 100) if len(r.L2.vehicles) > 10 else (255, 255, 255)
             self.screen.blit(self.font.render(t, True, c), (10, y))
             y += 20
+
+    def _highlight_priority_lane(self):
+        # Road A (Top), Lane 2 (Middle)
+        # Vertical strip from Top to Intersection
+        # X range: CX - 80 to CX - 40
+        # Y range: 0 to CY - INTERSECTION_SIZE//2
+        
+        surface = pygame.Surface((40, CY - INTERSECTION_SIZE//2), pygame.SRCALPHA)
+        surface.fill((255, 215, 0, 50)) # Gold tint, transparent
+        self.screen.blit(surface, (CX - 80, 0))
+        
+    def _draw_road_labels(self):
+        labels = [
+            ('A', (CX, 20)),
+            ('B', (SCREEN_WIDTH - 20, CY)),
+            ('C', (CX, SCREEN_HEIGHT - 20)),
+            ('D', (20, CY))
+        ]
+        
+        # Larger font for Labels
+        font = pygame.font.SysFont("Verdana", 24, bold=True)
+        
+        for text, (x, y) in labels:
+            surf = font.render(text, True, (255, 255, 255))
+            rect = surf.get_rect(center=(x, y))
+            self.screen.blit(surf, rect)
+
+    def _draw_lane_arrows(self):
+        # Draw arrows for L3 (Free Left)
+        # Position slightly upstream from stop line
+        offset = 60 
+        
+        # A-L3 (Top, Leftmost incoming) -> Turn Left
+        self._draw_arrow((CX - 100, CY - INTERSECTION_SIZE//2 - offset), "DOWN_LEFT")
+        
+        # B-L3 (Right, Topmost incoming) -> Turn Left
+        self._draw_arrow((CX + INTERSECTION_SIZE//2 + offset, CY - 100), "LEFT_DOWN")
+        
+        # C-L3 (Bot, Rightmost incoming) -> Turn Left
+        self._draw_arrow((CX + 100, CY + INTERSECTION_SIZE//2 + offset), "UP_RIGHT")
+        
+        # D-L3 (Left, Botmost incoming) -> Turn Left
+        self._draw_arrow((CX - INTERSECTION_SIZE//2 - offset, CY + 100), "RIGHT_UP")
+
+    def _draw_arrow(self, pos, direction):
+        x, y = pos
+        # pygame.draw.circle(self.screen, (255, 255, 255), (int(x), int(y)), 2)
+        
+        c = (200, 200, 200)
+        w = 3
+        sz = 15
+        
+        if direction == "DOWN_LEFT":
+            pygame.draw.line(self.screen, c, (x, y-sz), (x, y), w) # Straight
+            pygame.draw.line(self.screen, c, (x, y), (x-sz, y+sz//2), w) # Turn
+            # Arrowhead
+            pygame.draw.line(self.screen, c, (x-sz, y+sz//2), (x-sz+5, y+sz//2-5), w)
+            pygame.draw.line(self.screen, c, (x-sz, y+sz//2), (x-sz+5, y+sz//2+5), w)
+            
+        elif direction == "LEFT_DOWN":
+            pygame.draw.line(self.screen, c, (x+sz, y), (x, y), w)
+            pygame.draw.line(self.screen, c, (x, y), (x-sz//2, y+sz), w)
+            # Arrowhead
+            pygame.draw.line(self.screen, c, (x-sz//2, y+sz), (x-sz//2+5, y+sz-5), w)
+            pygame.draw.line(self.screen, c, (x-sz//2, y+sz), (x-sz//2-5, y+sz-5), w)
+
+        elif direction == "UP_RIGHT":
+            pygame.draw.line(self.screen, c, (x, y+sz), (x, y), w)
+            pygame.draw.line(self.screen, c, (x, y), (x+sz, y-sz//2), w)
+            # Arrowhead
+            pygame.draw.line(self.screen, c, (x+sz, y-sz//2), (x+sz-5, y-sz//2-5), w)
+            pygame.draw.line(self.screen, c, (x+sz, y-sz//2), (x+sz-5, y-sz//2+5), w)
+
+        elif direction == "RIGHT_UP":
+            pygame.draw.line(self.screen, c, (x-sz, y), (x, y), w)
+            pygame.draw.line(self.screen, c, (x, y), (x+sz//2, y-sz), w)
+            # Arrowhead
+            pygame.draw.line(self.screen, c, (x+sz//2, y-sz), (x+sz//2-5, y-sz+5), w)
+            pygame.draw.line(self.screen, c, (x+sz//2, y-sz), (x+sz//2+5, y-sz+5), w)
