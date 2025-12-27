@@ -68,3 +68,5 @@ The system simulates a 4-way intersection implementation using a client-server a
 
 ---
 *Created for DSA Queue Simulation Project*
+## Screen Record
+![Image](https://github.com/user-attachments/assets/95d08ed8-ea8f-4a9b-9a3d-5c8d75ba5f6e)
