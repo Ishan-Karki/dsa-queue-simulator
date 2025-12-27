@@ -85,14 +85,20 @@ def main():
     print("Queue-based vehicle generation system initialized.")
     
     # Speed Input
-    speed_level = 5
+    speed_level = 3
 
     
     def generator_loop():
-        valid_lanes = [2, 3, 4, 5, 8, 9, 10, 11]
         while True:
-            # Generate Logic
-            lane = random.choice(valid_lanes)
+            # Weighted Random Selection
+            # 60% chance for AL2 (Lane 2), 40% spread among others
+            if random.random() < 0.6:
+                lane = 2
+            else:
+                # Other valid lanes excluding 2
+                others = [3, 4, 5, 8, 9, 10, 11]
+                lane = random.choice(others)
+            
             road = get_road_from_lane(lane)
             v = Vehicle(lane, road)
             
@@ -100,10 +106,14 @@ def main():
             q.enqueue(v)
             print(f"Generated vehicle for Road {chr(ord('A')+road)} Lane {lane}")
             
-            # Delay
-            min_delay = max(100, 2000 - (speed_level - 1) * 200)
-            rng = max(50, 1000 - (speed_level - 1) * 100)
-            delay = (min_delay + random.randint(0, rng)) / 1000.0
+            # Dynamic Delay for Priority Buildup
+            if lane == 2:
+                # Faster bursts for AL2 to trigger priority
+                delay = random.uniform(0.2, 0.5)
+            else:
+                # Slower, efficient traffic for others
+                delay = random.uniform(0.5, 1.0)
+                
             time.sleep(delay)
 
     t = threading.Thread(target=generator_loop, daemon=True)
@@ -150,7 +160,7 @@ def main():
                             except:
                                 pass
             
-            time.sleep(0.2 + random.random() * 0.3)
+            time.sleep(0.1)
             
         except Exception as e:
             print(f"Error in send loop: {e}")
