@@ -1,6 +1,7 @@
 import pygame
 import math
 from utils import *
+from simulation import STATE_1, STATE_2
 
 # Colors
 # Colors - Restyled
@@ -119,25 +120,28 @@ class Visualizer:
              pygame.draw.line(self.screen, MARKING_WHITE, (sx, sy), (ex, ey), 2)
              
     def draw_traffic_lights(self, intersection):
-        # Draw lights at stop pos of each lane
+        # Draw one light per road, positioned between L1 and L2
         for r_id, road in intersection.roads.items():
-            for lane in [road.L1, road.L2, road.L3]:
-                pos = lane.stop_pos
-                state = lane.light.state
-                
-                # Draw Box
-                rect = pygame.Rect(0, 0, 20, 20)
-                rect.center = pos
-                pygame.draw.rect(self.screen, (0, 0, 0), rect)
-                
-                # Draw Light Circle
-                color = (0, 255, 0) if state == 'GREEN' else (255, 0, 0)
-                pygame.draw.circle(self.screen, color, pos, 8)
-                
-                # Glow effect
-                s = pygame.Surface((40, 40), pygame.SRCALPHA)
-                pygame.draw.circle(s, (*color, 50), (20, 20), 15)
-                self.screen.blit(s, s.get_rect(center=pos))
+            # Get midpoint between L1 and L2 stop positions
+            p1 = road.L1.stop_pos
+            p2 = road.L2.stop_pos
+            pos = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
+            
+            state = road.main_light.state
+            
+            # Draw Box
+            rect = pygame.Rect(0, 0, 24, 24)
+            rect.center = pos
+            pygame.draw.rect(self.screen, (20, 20, 20), rect, border_radius=4)
+            
+            # Draw Light Circle
+            color = (0, 255, 0) if state == STATE_2 else (255, 0, 0)
+            pygame.draw.circle(self.screen, color, pos, 10)
+            
+            # Glow effect
+            s = pygame.Surface((44, 44), pygame.SRCALPHA)
+            pygame.draw.circle(s, (*color, 60), (22, 22), 18)
+            self.screen.blit(s, s.get_rect(center=pos))
 
     def draw_vehicles(self, vehicles):
         for v in vehicles:
@@ -147,35 +151,17 @@ class Visualizer:
         # Draw queued vehicles stacked behind stop line
         for r in intersection.roads.values():
             for lane in [r.L1, r.L2, r.L3]:
-                for i, v in enumerate(lane.vehicles):
-                    # Stack them visually backwards from stop_pos
-                    # Needs Direction vector
-                    # A (Top): Up direction (0, -1)
-                    # B (Right): Right direction (1, 0)? No, Inbound is Left. (-1, 0)??
-                    # Queue grows AWAY from intersection.
-                    # A (Top): Queue grows Up (y decreases).
-                    # B (Right): Queue grows Right (x increases).
-                    # C (Bot): Queue grows Down (y increases).
-                    # D (Left): Queue grows Left (x decreases).
-                    
-                    sx, sy = lane.stop_pos
-                    gap = 25
-                    
-                    if r.id == 'A': y = sy - (i+1)*gap; x = sx
-                    elif r.id == 'C': y = sy + (i+1)*gap; x = sx
-                    elif r.id == 'B': x = sx + (i+1)*gap; y = sy # B Inbound comes from Right side, so Queue is on Right
-                    elif r.id == 'D': x = sx - (i+1)*gap; y = sy
-                    
-                    self._draw_static_car(x, y, lane)
+                for v in lane.vehicles:
+                    self._draw_static_car(v, lane)
 
-    def _draw_static_car(self, x, y, lane):
-        color = lane.vehicles[0].color if lane.vehicles else (255, 50, 50)
+    def _draw_static_car(self, v, lane):
+        color = v.color
         
         rect = pygame.Rect(0,0, 24, 14)
-        rect.center = (x, y)
+        rect.center = (v.x, v.y)
         if lane.road_id in ['A', 'C']:
             rect = pygame.Rect(0,0, 14, 24)
-            rect.center = (x, y)
+            rect.center = (v.x, v.y)
             
         pygame.draw.rect(self.screen, color, rect, border_radius=4)
 
@@ -190,14 +176,7 @@ class Visualizer:
         self.screen.blit(rot, r)
     
     def draw_ui(self, intersection):
-        txt = f"Priority Mode: {intersection.priority_mode}"
-        self.screen.blit(self.font.render(txt, True, (255, 255, 255)), (10, 10))
-        
-        y = 30
-        for rid, r in intersection.roads.items():
-            t = f"Road {rid} L2 Queue: {len(r.L2.vehicles)}"
-            c = (255, 100, 100) if len(r.L2.vehicles) > 10 else (255, 255, 255)
-            self.screen.blit(self.font.render(t, True, c), (10, y))
-            y += 20
+        # Debug UI removed as per user request
+        pass
 
 

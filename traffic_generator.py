@@ -13,19 +13,27 @@ def main():
                 print("Connected to Simulator!")
                 
                 while True:
-                    # Target: 2 vehicles every 3 seconds -> 1 vehicle every 1.5 seconds
-                    r_id = random.choice(['A', 'B', 'C', 'D'])
-                    l_id = random.choice(['L1', 'L2', 'L3'])
+                    # weighted choice: AL2 is much more likely
+                    # Combinations: (A/B/C/D) x (L1/L2/L3) = 12 total
+                    # Let's give AL2 a 40% chance, others split the rest
+                    roads = ['A', 'B', 'C', 'D']
+                    lanes = ['L1', 'L2', 'L3']
                     
-                    msg = f"{r_id}:{l_id}"
+                    if random.random() < 0.7:
+                        r, l = 'A', 'L2'
+                    else:
+                        r = random.choice(roads)
+                        l = random.choice(lanes)
+                    
+                    msg = f"{r}:{l}"
                     try:
                         s.sendall(msg.encode())
-                        print(f"[{time.strftime('%H:%M:%S')}] Spawned vehicle: {msg}")
+                        print(f"[{time.strftime('%H:%M:%S')}] Spawned vehicle: {r}:{l}")
                     except Exception as e:
                         print(f"Error sending: {e}")
                         break
                     
-                    time.sleep(0.5) # Fastened generation
+                    time.sleep(0.8) # Faster generation (approx. 75 vehicles/min)
                     
         except ConnectionRefusedError:
             print("Simulator not running. Retrying in 2s...")
