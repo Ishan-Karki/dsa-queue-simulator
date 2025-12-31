@@ -64,7 +64,31 @@ The project follows a **Client-Server** model:
 3.  **Green Time Calculation:** Green light duration is dynamic, calculated based on the number of waiting vehicles ($\text{duration} = \text{vehicle\_count} \times \text{time\_per\_car}$).
 4.  **Pathing:** Uses quadratic Bezier curves for smooth left and right turns to ensure realistic vehicle movement.
 
+<<<<<<< HEAD
 ## References
 - **Pygame Documentation:** [https://www.pygame.org/docs/](https://www.pygame.org/docs/)
 - **Python Socket Programming:** [https://docs.python.org/3/library/socket.html](https://docs.python.org/3/library/socket.html)
 - **Bezier Curves:** [Wikipedia](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
+=======
+- **`simulator.py`**: The efficient core of the project. It handles:
+  - Pygame rendering loop.
+  - Traffic light state machine (Normal Round-Robin vs. Priority Override).
+  - Vehicle physics and collision detection.
+  - Socket server for receiving spawn requests.
+
+- **`trafficgenerator.py`**: The logic engine. It handles:
+  - Random vehicle generation.
+  - Client-side queue tracking.
+  - Sending spawn commands to the simulator.
+
+## Controls
+
+- The simulation is fully automated.
+- **Current Mode** is displayed in the top-left corner (Normal vs. Priority).
+- Traffic lights change automatically based on timer logic and queue density.
+
+---
+*Created for DSA Queue Simulation Project*
+## Screen Record
+![Image](https://github.com/user-attachments/assets/95d08ed8-ea8f-4a9b-9a3d-5c8d75ba5f6e)
+>>>>>>> 78d8ddaf966b760a300676f53614afc4f94ed06d
