@@ -64,7 +64,6 @@ The project follows a **Client-Server** model:
 3.  **Green Time Calculation:** Green light duration is dynamic, calculated based on the number of waiting vehicles ($\text{duration} = \text{vehicle\_count} \times \text{time\_per\_car}$).
 4.  **Pathing:** Uses quadratic Bezier curves for smooth left and right turns to ensure realistic vehicle movement.
 
-<<<<<<< HEAD
 ## References
 - **Pygame Documentation:** [https://www.pygame.org/docs/](https://www.pygame.org/docs/)
 - **Python Socket Programming:** [https://docs.python.org/3/library/socket.html](https://docs.python.org/3/library/socket.html)
